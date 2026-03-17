@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <NavbarWrapper />
-        <main style={{ paddingTop: "60px" }}>{children}</main>
+        <main className="main-content">{children}</main>
         <footer
           style={{
             borderTop: "1px solid var(--shield-border)",
@@ -80,33 +80,8 @@ function NavbarWrapper() {
           </span>
         </Link>
 
-        {/* Nav — Primary links */}
         <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-          {[
-            { href: "/quiz",    label: "Mission" },
-            { href: "/salary",  label: "Earnings" },
-            { href: "/compare", label: "Compare" },
-            { href: "/history", label: "Archive" },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                fontFamily: "var(--font-hero)",
-                fontSize: "0.72rem",
-                letterSpacing: "0.08em",
-                color: "var(--shield-silver)",
-                textDecoration: "none",
-                padding: "6px 11px",
-                borderRadius: "4px",
-                textTransform: "uppercase",
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-
-          {/* Auth side — client-rendered to read localStorage */}
+          {/* Auth side and all nav links — client-rendered to read localStorage & handle mobile routing */}
           <ClientNavbar />
         </div>
       </div>

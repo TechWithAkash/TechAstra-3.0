@@ -170,7 +170,7 @@ export default function Home() {
           color: "var(--shield-silver)",
           marginBottom: "32px",
         }}>
-          SUPERHERO HORIZON INTELLIGENCE FOR EDUCATION &amp; LIFE DECISIONS
+          SUPERHERO INTELLIGENCE FOR EDUCATION &amp; LIFE DECISIONS
         </p>
 
         {/* Typewriter line */}
@@ -188,7 +188,7 @@ export default function Home() {
         </div>
 
         {/* CTAs */}
-        <div className="animate-fadeUp" style={{
+        <div className="hero-cta-group animate-fadeUp" style={{
           animationDelay: "0.7s", animationFillMode: "forwards",
           display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center",
           marginBottom: "56px",
@@ -230,7 +230,7 @@ export default function Home() {
 
       {/* ── STATS ─────────────────────────────────── */}
       <section style={{ maxWidth: "800px", margin: "0 auto", padding: "56px 32px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "32px 16px" }}>
           <Stat val="< 2s" label="AI Generation" />
           <Stat val="7"    label="Hero Archetypes" />
           <Stat val="20+"  label="Career Paths" />
@@ -249,7 +249,7 @@ export default function Home() {
           </h2>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: "28px 48px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: "28px 48px" }}>
           <Feature icon={<Zap size={20} />} title="Avengers Aptitude Assessment" desc="5 targeted questions map your personality to a Marvel hero archetype." />
           <Feature icon={<Play size={20} />} title="Cinematic Hero Reveal" desc="A classified 4-second sequence reveals your identity. This is the WOW moment." />
           <Feature icon={<Bot size={20} />} title="AI Mission Dossier" desc="Groq LLaMA-3.3-70B generates a full career roadmap in under 2 seconds." />

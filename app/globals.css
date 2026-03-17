@@ -522,3 +522,215 @@ h1, h2, h3  { font-family: var(--font-hero); text-transform: uppercase; letter-s
 .bg-navy      { background-color: var(--shield-navy); }
 .bg-dark      { background-color: var(--shield-dark); }
 .bg-shield    { background-color: var(--shield-black); }
+
+/* ===========================
+   BOTTOM MOBILE NAVIGATION
+   =========================== */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(10, 10, 10, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--shield-border);
+  z-index: 1000;
+  padding: 10px 8px;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 10px);
+}
+
+.mobile-bottom-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--shield-red), var(--shield-gold), var(--shield-red));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--shield-silver);
+  text-decoration: none;
+  font-family: var(--font-hero);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s, transform 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
+  color: var(--shield-gold);
+}
+
+.bottom-nav-item.active {
+  transform: translateY(-2px);
+}
+
+/* ===========================
+   RESPONSIVE BREAKPOINTS
+   =========================== */
+
+/* ===========================
+   RESPONSIVE LAYOUT
+   =========================== */
+.main-content {
+  padding-top: 60px;
+}
+
+/* TABLET — 768px and below */
+@media (max-width: 768px) {
+
+  /* Navbar Adjustments */
+  .shield-navbar { display: none; }
+  .main-content { padding-top: 0; }
+  .mobile-bottom-bar { display: flex; }
+  body { padding-bottom: 70px; /* Space for bottom bar */ }
+
+  /* Buttons — full width on very small forms */
+  .btn-gold,
+  .btn-outline,
+  .btn-red {
+    font-size: 0.82rem;
+    padding: 10px 18px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Dossier panel watermark — too large on mobile */
+  .dossier-panel::after { font-size: 3.5rem; }
+
+  /* Quiz options */
+  .quiz-option {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  /* Stat pills smaller */
+  .stat-pill { font-size: 0.72rem; padding: 3px 10px; }
+
+  /* Roadmap dot */
+  .roadmap-dot { width: 34px; height: 34px; }
+  .roadmap-node:not(:last-child)::after { left: 16px; }
+
+  /* Hero card */
+  .hero-card { padding: 20px 16px; border-radius: 12px; }
+
+  /* Chart */
+  .chart-wrapper { padding: 16px 12px; }
+}
+
+/* MOBILE — 480px and below */
+@media (max-width: 480px) {
+
+  /* Global text */
+  body { font-size: 0.9rem; }
+
+  /* Headings */
+  h1 { font-size: clamp(1.6rem, 6vw, 2.2rem) !important; letter-spacing: 0.02em; }
+  h2 { font-size: clamp(1.2rem, 5vw, 1.6rem) !important; }
+  h3 { font-size: clamp(1rem, 4vw, 1.2rem) !important; }
+
+  /* Navbar brand */
+  .shield-navbar .brand-text { font-size: 0.85rem; }
+
+  /* Button — make them full width in stacked layouts */
+  .btn-gold,
+  .btn-outline,
+  .btn-red {
+    font-size: 0.78rem;
+    padding: 10px 16px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Shield input */
+  .shield-input {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  /* Dossier panel */
+  .dossier-panel::after { font-size: 2.5rem; }
+
+  /* Glass card border radius */
+  .glass-card { border-radius: 10px; }
+
+  /* Quiz option */
+  .quiz-option {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Roadmap */
+  .roadmap-node { gap: 12px; }
+  .roadmap-dot { width: 30px; height: 30px; font-size: 0.65rem; }
+  .roadmap-node:not(:last-child)::after { left: 14px; top: 36px; }
+
+  /* Section label */
+  .section-label { font-size: 0.62rem; letter-spacing: 0.15em; }
+
+  /* Classified stamp */
+  .classified-stamp { font-size: 0.62rem; padding: 2px 8px; letter-spacing: 0.18em; }
+
+  /* Stat pills */
+  .stat-pill { font-size: 0.68rem; padding: 3px 8px; }
+}
+
+/* ===========================
+   MOBILE PAGE OVERRIDES
+   =========================== */
+
+/* Landing page hero buttons — stack on mobile */
+@media (max-width: 520px) {
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-cta-group a,
+  .hero-cta-group button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Salary city buttons — wrap nicely */
+@media (max-width: 600px) {
+  .city-btn-group {
+    gap: 8px;
+  }
+  .city-btn-group button {
+    font-size: 0.72rem !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* Compare grid — single column on mobile */
+@media (max-width: 640px) {
+  .compare-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Dossier skills/certs grid — single col on mobile */
+@media (max-width: 600px) {
+  .dossier-two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Salary city cards grid */
+@media (max-width: 480px) {
+  .salary-city-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+

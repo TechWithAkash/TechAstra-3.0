@@ -160,7 +160,7 @@ export default function SalaryPage() {
         {/* City selector */}
         <div style={{ marginBottom: "40px" }}>
           <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--shield-silver)", letterSpacing: "0.2em", marginBottom: "14px", textAlign: "center" }}>SELECT TARGET CITY</p>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
+          <div className="city-btn-group" style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
             {CITIES.map(({ key, label, icon }) => (
               <button
                 key={key}

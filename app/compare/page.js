@@ -95,8 +95,8 @@ export default function ComparePage() {
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px" }}>
 
         {/* Selectors */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "16px", alignItems: "center", marginBottom: "40px" }}>
-          <div>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "16px", alignItems: "center", marginBottom: "40px" }}>
+          <div style={{ flex: "1 1 min-content" }}>
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--shield-silver)", letterSpacing: "0.15em", marginBottom: "8px" }}>COURSE A</p>
             <select
               value={left}
@@ -107,8 +107,8 @@ export default function ComparePage() {
               {COURSE_OPTIONS.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}
             </select>
           </div>
-          <div style={{ fontFamily: "var(--font-hero)", fontSize: "1.5rem", color: "var(--shield-gold)", textAlign: "center", paddingTop: "24px" }}>VS</div>
-          <div>
+          <div style={{ fontFamily: "var(--font-hero)", fontSize: "1.5rem", color: "var(--shield-gold)", textAlign: "center", padding: "12px" }}>VS</div>
+          <div style={{ flex: "1 1 min-content" }}>
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--shield-silver)", letterSpacing: "0.15em", marginBottom: "8px" }}>COURSE B</p>
             <select
               value={right}
@@ -122,7 +122,7 @@ export default function ComparePage() {
         </div>
 
         {/* Comparison Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "32px" }}>
+        <div className="compare-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "32px" }}>
           {[L, R].map((d, idx) => (
             <div key={idx} className="dossier-panel" style={{ padding: "28px" }}>
               <div style={{ borderBottom: `2px solid ${d.color}`, paddingBottom: "16px", marginBottom: "20px" }}>

@@ -383,7 +383,7 @@ export default function DossierPage() {
             )}
 
             {/* Skills + Certifications */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "36px" }}>
+            <div className="dossier-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "36px" }}>
               {dossier.criticalSkills?.length > 0 && (
                 <div>
                   <SectionHeader icon={<Zap size={18} />} label="Critical Skills" />
