@@ -108,7 +108,6 @@ export default function QuizPage() {
     >
       <div style={{ width: "100%", maxWidth: "680px" }}>
 
-        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
             <ShieldLogo />

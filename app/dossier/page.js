@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { Shield, Zap, Target, Sparkles, BookOpen, AlertTriangle, Check, Archive, FolderOpen, IndianRupee, Map, Trophy, Search, Building2, Waves, Landmark, MountainSnow, Diamond, Leaf, Hammer, Droplet } from "lucide-react";
 import { HERO_SCORING_MATRIX } from "@/lib/heroAssignment";
 
-/* ── Helpers ─────────────────────────────────────── */
 function getOrCreateSession() {
   if (typeof window === "undefined") return "anon";
   let sid = localStorage.getItem("shield_session");
@@ -17,7 +16,6 @@ function getOrCreateSession() {
 
 const DEMAND_COLOR = { Critical: "#10B981", High: "#F5A623", Moderate: "#2563EB", Low: "#9CA3AF" };
 
-/* ── Sub-components ──────────────────────────────── */
 function SectionHeader({ icon, label }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--shield-border)" }}>

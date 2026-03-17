@@ -15,15 +15,14 @@ const AVENGER_ICONS = {
   bruce_banner:    <Droplet size={48} fill="currentColor" />,
 };
 
-// Cinematic sequence stages
 const STAGES = [
-  "black",       // 0: Full black
-  "logo",        // 1: S.H.I.E.L.D. logo pulses
-  "identified",  // 2: "AGENT IDENTIFIED" text
-  "hero",        // 3: Hero name + title appears
-  "classified",  // 4: CLASSIFIED stamp
-  "quote",       // 5: Hero tagline (typewriter)
-  "cta",         // 6: CTA button
+  "black",       
+  "logo",        
+  "identified",  
+  "hero",        
+  "classified",  
+  "quote",       
+  "cta",         
 ];
 
 const TIMING = [400, 1000, 1700, 2400, 3000, 3500, 4200];
@@ -99,7 +98,6 @@ export default function HeroRevealPage() {
         transition: "background 0.8s ease",
       }}
     >
-      {/* Radial hero glow */}
       {stage >= 3 && (
         <div
           style={{

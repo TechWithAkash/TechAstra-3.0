@@ -187,7 +187,6 @@ export default function SalaryPage() {
           </div>
         </div>
 
-        {/* Charts */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           {sortedData.map((d, rank) => {
             const c = d.cities[selectedCity];
