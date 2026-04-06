@@ -138,6 +138,10 @@ export default function DashboardPage() {
   const [recalibrated, setRecalibrated] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const [courseSearch, setCourseSearch] = useState("");
+  const [generationLoading, setGenerationLoading] = useState(false);
+  const [generationError, setGenerationError] = useState("");
+
   useEffect(() => {
     setMounted(true);
     // Load hero
@@ -239,21 +243,115 @@ export default function DashboardPage() {
     }
   }
 
+  async function generateDossier() {
+    const activeCourse = courseSearch.trim();
+    if (!activeCourse || !hero) return;
+    
+    setGenerationLoading(true); 
+    setGenerationError(""); 
+    
+    try {
+      const res = await fetch("/api/dossier", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          heroId: hero.heroId,
+          heroName: hero.name,
+          course: activeCourse,
+          profile,
+        }),
+      });
+      if (!res.ok) throw new Error("Generation failed");
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      
+      setDossier(data);
+      setCourse(activeCourse);
+      setCompletedModules([]);
+      
+      // Save full dossier to localStorage so it persists
+      localStorage.setItem("shield_dossier", JSON.stringify({ dossier: data, course: activeCourse, hero }));
+      // Save progress initialize
+      const progKey = `shield_progress_${activeCourse.toLowerCase().replace(/\\s+/g, "_").slice(0, 40)}`;
+      localStorage.setItem(progKey, JSON.stringify({ completed: [], streak: 0, startedAt: Date.now() }));
+    } catch (err) {
+      setGenerationError("Mission generation failed. Systems resetting. Please try again.");
+    } finally {
+      setGenerationLoading(false);
+    }
+  }
+
   if (!mounted) return null;
 
   if (!dossier) {
     return (
-      <div style={{ minHeight: "calc(100vh - 60px)", background: "var(--shield-black)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "24px", padding: "48px 24px" }}>
-        <LayoutDashboard size={48} color="var(--shield-silver)" />
-        <h2 style={{ fontFamily: "var(--font-hero)", fontSize: "1.4rem", color: "var(--shield-white)", letterSpacing: "0.06em", textAlign: "center" }}>
-          No Mission Active
-        </h2>
-        <p style={{ color: "var(--shield-silver)", textAlign: "center", maxWidth: "400px", lineHeight: 1.6 }}>
-          Generate your first Mission Dossier to activate your dashboard and track your Career DNA Score.
-        </p>
-        <a href="/quiz" className="btn-gold" style={{ display: "inline-flex", alignItems: "center" }}>
-          <Zap size={16} fill="var(--shield-black)" style={{ marginRight: "8px" }} /> Begin Your Mission
-        </a>
+      <div style={{ minHeight: "calc(100vh - 60px)", background: "var(--shield-black)", paddingBottom: "80px" }}>
+        {/* Banner */}
+        <div style={{ background: "linear-gradient(90deg, #0A0A0A, #111827, #0A0A0A)", borderBottom: "1px solid var(--shield-border)", padding: "40px 24px" }}>
+          <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
+            <div className="classified-stamp" style={{ marginBottom: "16px" }}>Classified — Target Field Calibration</div>
+            <h1 style={{ fontFamily: "var(--font-hero)", fontSize: "clamp(1.8rem, 5vw, 3rem)", color: "var(--shield-white)", letterSpacing: "0.04em" }}>
+              Initialize Your <span className="text-gold-gradient">Dashboard</span>
+            </h1>
+            <p style={{ color: "var(--shield-silver)", marginTop: "12px", fontSize: "0.95rem" }}>
+              Agent {hero?.name || "Unknown"}, provide your target field to lock in your custom learning path.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: "700px", margin: "40px auto", padding: "0 24px" }}>
+          {/* Course Search */}
+          <div className="dossier-panel" style={{ padding: "32px", marginBottom: "32px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--shield-border)" }}>
+              <span style={{ fontSize: "1.1rem" }}><Target size={18} /></span>
+              <span style={{ fontFamily: "var(--font-hero)", fontSize: "0.85rem", letterSpacing: "0.12em", color: "var(--shield-gold)" }}>
+                Intel Query — Mission Objective
+              </span>
+            </div>
+            
+            <input
+              className="shield-input"
+              placeholder="Enter your target field or course (e.g. Frontend React Developer)"
+              value={courseSearch}
+              onChange={(e) => setCourseSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && courseSearch.trim().length >= 2) generateDossier(); }}
+            />
+
+            <button
+              className="btn-gold"
+              onClick={generateDossier}
+              disabled={courseSearch.trim().length < 2 || generationLoading}
+              style={{
+                marginTop: "20px", width: "100%", justifyContent: "center", display: "flex", alignItems: "center",
+                opacity: (courseSearch.trim().length >= 2 && !generationLoading) ? 1 : 0.5,
+                cursor: (courseSearch.trim().length >= 2 && !generationLoading) ? "pointer" : "not-allowed",
+              }}
+            >
+              {generationLoading ? "JARVIS is building your adaptive dashboard..." : <><Zap size={16} fill="var(--shield-black)" style={{ marginRight: "6px" }} /> Activate Dashboard</>}
+            </button>
+          </div>
+
+          {/* Loading */}
+          {generationLoading && (
+            <div style={{ textAlign: "center", padding: "40px 24px" }}>
+              <div className="arc-loader" style={{ margin: "0 auto 20px" }} />
+              <p style={{ fontFamily: "var(--font-hero)", color: hero?.color || "var(--shield-gold)", letterSpacing: "0.15em", marginBottom: "8px", animation: "glow-pulse 2s ease-in-out infinite" }}>
+                JARVIS IS COMPILING YOUR MODULES...
+              </p>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--shield-silver)", letterSpacing: "0.2em" }}>
+                GROQ LLaMA-3.3-70B · PERSONALIZING PROGRESS METRICS
+              </p>
+            </div>
+          )}
+
+          {/* Error */}
+          {generationError && (
+            <div style={{ padding: "16px 20px", background: "rgba(192,57,43,0.1)", border: "1px solid rgba(192,57,43,0.3)", borderLeft: "3px solid var(--shield-red)", borderRadius: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <AlertTriangle size={16} color="var(--shield-red)" />
+              <p style={{ color: "var(--shield-red)", fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{generationError}</p>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
