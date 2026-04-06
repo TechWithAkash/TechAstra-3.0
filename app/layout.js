@@ -1,5 +1,5 @@
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/AppShell";
 import { Analytics } from "@vercel/analytics/next"
 
 export const metadata = {
@@ -17,27 +17,24 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Analytics />
-        <div className="app-container">
-          <Sidebar />
-          <div className="main-content">
-            {children}
-            <footer
-              style={{
-                borderTop: "1px solid var(--shield-border)",
-                padding: "20px 24px",
-                textAlign: "center",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.65rem",
-                color: "var(--shield-silver)",
-                opacity: 0.45,
-                letterSpacing: "0.12em",
-                marginTop: "auto"
-              }}
-            >
-              CLASSIFIED // S.H.I.E.L.D. INTERNAL DOCUMENT // EYES ONLY · TECH ASTRA WEBATHON 2026
-            </footer>
-          </div>
-        </div>
+        <AppShell>
+          {children}
+          <footer
+            style={{
+              borderTop: "1px solid var(--shield-border)",
+              padding: "20px 24px",
+              textAlign: "center",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.65rem",
+              color: "var(--shield-silver)",
+              opacity: 0.45,
+              letterSpacing: "0.12em",
+              marginTop: "auto"
+            }}
+          >
+            CLASSIFIED // S.H.I.E.L.D. INTERNAL DOCUMENT // EYES ONLY · TECH ASTRA WEBATHON 2026
+          </footer>
+        </AppShell>
       </body>
     </html>
   );

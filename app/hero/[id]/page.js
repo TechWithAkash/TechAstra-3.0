@@ -295,14 +295,14 @@ export default function HeroRevealPage() {
             }}
           >
             <Link
-              href="/dossier"
+              href="/dashboard"
               className="btn-gold"
               style={{ fontSize: "1rem", padding: "14px 36px" }}
               onClick={() => {
                 sessionStorage.setItem("shield_hero", JSON.stringify({ heroId: id, ...hero }));
               }}
             >
-              <Target size={16} style={{ marginRight: "6px" }} /> Generate Mission Dossier
+              <Target size={16} style={{ marginRight: "6px" }} /> Enter Dashboard
             </Link>
             <Link href="/quiz" className="btn-outline" style={{ display: "inline-flex", alignItems: "center" }}>
               <ArrowLeft size={16} style={{ marginRight: "6px" }} /> Retake Quiz

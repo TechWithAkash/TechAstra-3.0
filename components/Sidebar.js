@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/", label: "Home", icon: <Home size={20} /> },
-  { href: "/quiz", label: "Assessment", icon: <Zap size={20} /> },
+  // { href: "/", label: "Home", icon: <Home size={20} /> },
+  // { href: "/quiz", label: "Assessment", icon: <Zap size={20} /> },
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
   { href: "/dossier", label: "Dossier", icon: <BookOpen size={20} /> },
   { href: "/progress", label: "Progress", icon: <TrendingUp size={20} /> },

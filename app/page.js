@@ -187,13 +187,12 @@ export default function Home() {
           {cursor && <span style={{ display: "inline-block", width: "2px", height: "1em", background: "var(--shield-gold)", marginLeft: "1px", verticalAlign: "text-bottom" }} />}
         </div>
 
-        {/* CTAs */}
         <div className="hero-cta-group animate-fadeUp" style={{
           animationDelay: "0.7s", animationFillMode: "forwards",
           display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center",
           marginBottom: "56px",
         }}>
-          <Link href="/quiz" className="btn-gold" style={{ fontSize: "0.95rem", padding: "13px 32px", display: "flex", alignItems: "center" }}>
+          <Link href="/login" className="btn-gold" style={{ fontSize: "0.95rem", padding: "13px 32px", display: "flex", alignItems: "center" }}>
             <Zap size={16} fill="var(--shield-black)" style={{ marginRight: "8px" }} /> Begin Your Mission
           </Link>
           <Link href="/signup" className="btn-outline" style={{ fontSize: "0.95rem", padding: "12px 28px", display: "flex", alignItems: "center" }}>
@@ -293,11 +292,11 @@ export default function Home() {
         </div>
 
         <div style={{ marginTop: "48px" }}>
-          <Link href="/quiz" className="btn-gold" style={{ fontSize: "1rem", padding: "14px 44px", display: "inline-flex", alignItems: "center" }}>
+          <Link href="/login" className="btn-gold" style={{ fontSize: "1rem", padding: "14px 44px", display: "inline-flex", alignItems: "center" }}>
             <Zap size={18} fill="var(--shield-black)" style={{ marginRight: "8px" }} /> Start Your Mission
           </Link>
           <p style={{ marginTop: "14px", fontFamily: "var(--font-mono)", fontSize: "0.6rem", letterSpacing: "0.15em", color: "var(--shield-silver)", opacity: 0.45 }}>
-            NO LOGIN REQUIRED · FREE · NO PII STORED
+            S.H.I.E.L.D. AGENT CLEARANCE REQUIRED
           </p>
         </div>
       </section>

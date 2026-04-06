@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { AlertTriangle, Zap } from "lucide-react";
+import { AlertTriangle, Zap, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setAuth } from "@/lib/auth";
@@ -58,6 +58,14 @@ export default function LoginPage() {
     }
   }
 
+  function handleDemoLogin() {
+    setAuth({
+      token: "demo-token-xyz789",
+      user: { userId: "demo-admin", name: "Demo User", email: "demo@shield.gov" }
+    });
+    router.push("/quiz");
+  }
+
   return (
     <div style={{
       minHeight: "calc(100vh - 60px)",
@@ -85,7 +93,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <div className="dossier-panel" style={{ padding: "32px" }}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", marginBottom: "16px" }}>
 
             <div>
               <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "0.65rem", letterSpacing: "0.15em", color: "var(--shield-silver)", marginBottom: "8px" }}>
@@ -140,6 +148,23 @@ export default function LoginPage() {
               ) : <><Zap size={16} style={{ marginRight: "6px" }} /> Access S.H.I.E.L.D.</>}
             </button>
           </form>
+
+          {/* Quick Access / Demo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ flex: 1, height: "1px", background: "var(--shield-border)" }} />
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "var(--shield-silver)", letterSpacing: "0.15em" }}>OR</span>
+            <div style={{ flex: 1, height: "1px", background: "var(--shield-border)" }} />
+          </div>
+
+          <button
+            type="button"
+            className="btn-outline"
+            onClick={handleDemoLogin}
+            style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", borderColor: "var(--shield-silver)", color: "var(--shield-white)" }}
+          >
+            <ShieldCheck size={16} style={{ marginRight: "8px", color: "var(--shield-gold)" }} />
+            Demo Access Login
+          </button>
 
           <div className="glow-line" style={{ margin: "24px 0" }} />
 
