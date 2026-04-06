@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { getAuth, clearAuth } from "@/lib/auth";
 import {
   Zap, Home, BookOpen, FolderOpen, IndianRupee, BarChart2,
-  LayoutDashboard, TrendingUp, LogIn, LogOut, UserPlus,
+  LayoutDashboard, TrendingUp, LogIn, LogOut, UserPlus, MessageSquare
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -14,6 +14,7 @@ const NAV_LINKS = [
   // { href: "/quiz", label: "Assessment", icon: <Zap size={20} /> },
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
   { href: "/dossier", label: "Dossier", icon: <BookOpen size={20} /> },
+  { href: "/mentor", label: "AI Mentor", icon: <MessageSquare size={20} /> },
   { href: "/progress", label: "Progress", icon: <TrendingUp size={20} /> },
   { href: "/history", label: "Archive", icon: <FolderOpen size={20} /> },
   { href: "/salary", label: "Earnings", icon: <IndianRupee size={20} /> },
@@ -23,6 +24,7 @@ const NAV_LINKS = [
 const MOBILE_LINKS = [
   { href: "/", label: "Home", icon: <Home size={22} /> },
   { href: "/dossier", label: "Dossier", icon: <BookOpen size={22} /> },
+  { href: "/mentor", label: "AI Mentor", icon: <MessageSquare size={22} /> },
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={22} /> },
   { href: "/progress", label: "Progress", icon: <TrendingUp size={22} /> },
   { href: "/history", label: "Archive", icon: <FolderOpen size={22} /> },
