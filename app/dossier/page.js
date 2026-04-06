@@ -1,9 +1,15 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Zap, Target, Sparkles, BookOpen, AlertTriangle, Check, Archive, FolderOpen, IndianRupee, Map, Trophy, Search, Building2, Waves, Landmark, MountainSnow, Diamond, Leaf, Hammer, Droplet } from "lucide-react";
+import {
+  Shield, Zap, Target, Sparkles, BookOpen, AlertTriangle, Check, Archive,
+  FolderOpen, IndianRupee, Map, Trophy, Search, Building2, Waves, Landmark,
+  MountainSnow, Diamond, Leaf, Hammer, Droplet, ChevronDown, ChevronUp,
+  CheckCircle2, Circle, LayoutDashboard,
+} from "lucide-react";
 import { HERO_SCORING_MATRIX } from "@/lib/heroAssignment";
 
+/* ── Session helpers ─────────────────────────────── */
 function getOrCreateSession() {
   if (typeof window === "undefined") return "anon";
   let sid = localStorage.getItem("shield_session");
@@ -14,18 +20,43 @@ function getOrCreateSession() {
   return sid;
 }
 
+function getProfile() {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem("shield_profile");
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function getProgressKey(course) {
+  return `shield_progress_${course?.toLowerCase().replace(/\s+/g, "_").slice(0, 40)}`;
+}
+
+function loadProgress(course) {
+  if (typeof window === "undefined") return { completed: [], streak: 0 };
+  try {
+    const raw = localStorage.getItem(getProgressKey(course));
+    return raw ? JSON.parse(raw) : { completed: [], streak: 0 };
+  } catch { return { completed: [], streak: 0 }; }
+}
+
+function saveProgress(course, data) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(getProgressKey(course), JSON.stringify(data));
+}
+
+/* ── Constants ─────────────────────────────────────── */
 const DEMAND_COLOR = { Critical: "#10B981", High: "#F5A623", Moderate: "#2563EB", Low: "#9CA3AF" };
 
+const LEVEL_LABELS = { beginner: "Beginner Agent", intermediate: "Field Operative", advanced: "Senior Operative" };
+const LEVEL_COLORS = { beginner: "#10B981", intermediate: "#F5A623", advanced: "#7C3AED" };
+
+/* ── Sub-components ────────────────────────────────── */
 function SectionHeader({ icon, label }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--shield-border)" }}>
       <span style={{ fontSize: "1.1rem" }}>{icon}</span>
-      <span style={{
-        fontFamily: "var(--font-hero)",
-        fontSize: "0.85rem",
-        letterSpacing: "0.12em",
-        color: "var(--shield-gold)",
-      }}>
+      <span style={{ fontFamily: "var(--font-hero)", fontSize: "0.85rem", letterSpacing: "0.12em", color: "var(--shield-gold)" }}>
         {label}
       </span>
     </div>
@@ -46,8 +77,7 @@ function CareerCard({ career, index }) {
             <span style={{ fontFamily: "var(--font-hero)", fontSize: "0.65rem", color: "var(--shield-silver)", letterSpacing: "0.15em" }}>PATH {String(index + 1).padStart(2, "0")}</span>
             <span style={{ display: "inline-block", width: "4px", height: "4px", borderRadius: "50%", background: "var(--shield-border)" }} />
             <span style={{
-              fontSize: "0.7rem",
-              fontFamily: "var(--font-mono)",
+              fontSize: "0.7rem", fontFamily: "var(--font-mono)",
               color: DEMAND_COLOR[career.demandLevel] || "var(--shield-silver)",
               padding: "2px 8px",
               border: `1px solid ${DEMAND_COLOR[career.demandLevel] || "var(--shield-silver)"}30`,
@@ -66,7 +96,6 @@ function CareerCard({ career, index }) {
           <div style={{ fontFamily: "var(--font-hero)", fontSize: "0.9rem", color: "#10B981" }}>{career.seniorLPA}</div>
         </div>
       </div>
-
       {expanded && (
         <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--shield-border)" }}>
           <p style={{ fontSize: "0.88rem", color: "var(--shield-silver)", lineHeight: 1.6, marginBottom: "12px" }}>{career.description}</p>
@@ -77,7 +106,6 @@ function CareerCard({ career, index }) {
           </div>
         </div>
       )}
-
       <div style={{ marginTop: "12px", textAlign: "right" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--shield-silver)", letterSpacing: "0.15em", opacity: 0.6 }}>
           {expanded ? "▲ COLLAPSE" : "▼ EXPAND INTEL"}
@@ -90,13 +118,10 @@ function CareerCard({ career, index }) {
 function RoadmapStep({ step, index, heroColor }) {
   const IconProps = { size: 16 };
   const avengerMap = {
-    captain_america: <Shield {...IconProps} />,
-    iron_man: <Zap {...IconProps} fill="currentColor" />,
-    thor: <Hammer {...IconProps} fill="currentColor" />,
-    hulk: <Droplet {...IconProps} fill="currentColor" />,
-    doctor_strange: <Sparkles {...IconProps} />,
-    black_widow: <Target {...IconProps} />,
-    black_panther: <Target {...IconProps} fill="currentColor" />
+    captain_america: <Shield {...IconProps} />, iron_man: <Zap {...IconProps} fill="currentColor" />,
+    thor: <Hammer {...IconProps} fill="currentColor" />, hulk: <Droplet {...IconProps} fill="currentColor" />,
+    doctor_strange: <Sparkles {...IconProps} />, black_widow: <Target {...IconProps} />,
+    black_panther: <Target {...IconProps} fill="currentColor" />,
   };
   return (
     <div className="roadmap-node" style={{ marginBottom: "28px" }}>
@@ -149,10 +174,118 @@ function SalaryTable({ salaryIntel }) {
   );
 }
 
+/* ── Learning Module Card ────────────────────────── */
+function LearningModuleCard({ module, index, isCompleted, onToggle, heroColor }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div
+      className="glass-card"
+      style={{
+        padding: "18px 20px",
+        borderColor: isCompleted ? `${heroColor}50` : "rgba(245,166,35,0.15)",
+        background: isCompleted ? `${heroColor}08` : "var(--shield-card)",
+        transition: "all 0.3s",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+        {/* Checkbox */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggle(index); }}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: isCompleted ? heroColor : "var(--shield-border)",
+            flexShrink: 0, marginTop: "2px", transition: "color 0.2s",
+            padding: 0, display: "flex",
+          }}
+        >
+          {isCompleted ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+        </button>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "4px" }}>
+            <div>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: heroColor, letterSpacing: "0.15em" }}>
+                WEEK {module.week} · {module.phase?.toUpperCase()}
+              </span>
+            </div>
+            <span className="stat-pill" style={{ fontSize: "0.65rem", whiteSpace: "nowrap", flexShrink: 0 }}>
+              ~{module.estimatedHours}h
+            </span>
+          </div>
+
+          <h3
+            style={{
+              fontFamily: "var(--font-hero)", fontSize: "0.95rem",
+              color: isCompleted ? heroColor : "var(--shield-white)",
+              letterSpacing: "0.03em", marginBottom: "6px",
+              textDecoration: isCompleted ? "line-through" : "none",
+              opacity: isCompleted ? 0.7 : 1,
+              cursor: "pointer",
+            }}
+            onClick={() => setExpanded(!expanded)}
+          >
+            {module.topic}
+          </h3>
+
+          {expanded && (
+            <div style={{ marginTop: "12px" }}>
+              {module.objectives?.length > 0 && (
+                <div style={{ marginBottom: "10px" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "var(--shield-silver)", letterSpacing: "0.12em", marginBottom: "6px" }}>
+                    OBJECTIVES
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    {module.objectives.map((obj, i) => (
+                      <div key={i} style={{ display: "flex", gap: "8px", fontSize: "0.82rem", color: "var(--shield-white)", alignItems: "flex-start" }}>
+                        <span style={{ color: heroColor, flexShrink: 0, marginTop: "1px" }}>◆</span> {obj}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {module.resources?.length > 0 && (
+                <div style={{ marginBottom: "10px" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "var(--shield-silver)", letterSpacing: "0.12em", marginBottom: "6px" }}>
+                    RESOURCES
+                  </div>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {module.resources.map((r, i) => (
+                      <span key={i} style={{ fontSize: "0.78rem", padding: "3px 10px", background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: "4px", color: "var(--shield-blue)" }}>{r}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {module.checkpointQuestion && (
+                <div style={{ marginTop: "10px", padding: "12px 16px", background: `${heroColor}08`, border: `1px solid ${heroColor}25`, borderRadius: "6px" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: heroColor, letterSpacing: "0.12em", marginBottom: "4px" }}>
+                    CHECKPOINT QUIZ
+                  </div>
+                  <p style={{ fontSize: "0.82rem", color: "var(--shield-white)", fontStyle: "italic" }}>
+                    {module.checkpointQuestion}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--shield-silver)", flexShrink: 0, padding: 0, display: "flex" }}
+        >
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Dossier Page ───────────────────────────── */
 export default function DossierPage() {
   const router = useRouter();
   const [hero, setHero] = useState(null);
+  const [profile, setProfile] = useState({});
   const [course, setCourse] = useState("");
   const [courseSearch, setCourseSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -161,13 +294,32 @@ export default function DossierPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [completedModules, setCompletedModules] = useState([]);
   const debounceRef = useRef(null);
 
-  // Load hero from sessionStorage
+  // Load hero + profile from storage
   useEffect(() => {
     const stored = sessionStorage.getItem("shield_hero");
-    if (stored) {
-      try { setHero(JSON.parse(stored)); } catch {}
+    if (stored) { try { setHero(JSON.parse(stored)); } catch {} }
+
+    const storedProfile = localStorage.getItem("shield_profile");
+    if (storedProfile) { try { setProfile(JSON.parse(storedProfile)); } catch {} }
+
+    // Load existing dossier from localStorage
+    const storedDossier = localStorage.getItem("shield_dossier");
+    if (storedDossier) {
+      try {
+        const { dossier: d, course: c, hero: h } = JSON.parse(storedDossier);
+        if (d && c) {
+          setDossier(d);
+          setCourse(c);
+          setCourseSearch(c);
+          if (h && !stored) setHero(h);
+          // Load progress
+          const prog = loadProgress(c);
+          setCompletedModules(prog.completed || []);
+        }
+      } catch {}
     }
   }, []);
 
@@ -194,17 +346,36 @@ export default function DossierPage() {
       const res = await fetch("/api/dossier", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ heroId: hero.heroId, heroName: hero.name, course: activeCourse }),
+        body: JSON.stringify({
+          heroId: hero.heroId,
+          heroName: hero.name,
+          course: activeCourse,
+          profile,
+        }),
       });
       if (!res.ok) throw new Error("Generation failed");
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setDossier(data);
+      setCompletedModules([]);
+      // Save full dossier to localStorage
+      localStorage.setItem("shield_dossier", JSON.stringify({ dossier: data, course: activeCourse, hero }));
+      saveProgress(activeCourse, { completed: [], streak: 0, startedAt: Date.now() });
     } catch (err) {
       setError("The Infinity Stones are misaligned. Please retry, Agent.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function toggleModule(index) {
+    const activeCourse = course || courseSearch.trim();
+    const newCompleted = completedModules.includes(index)
+      ? completedModules.filter((i) => i !== index)
+      : [...completedModules, index];
+    setCompletedModules(newCompleted);
+    const existing = loadProgress(activeCourse);
+    saveProgress(activeCourse, { ...existing, completed: newCompleted, lastActive: Date.now() });
   }
 
   async function saveDossier() {
@@ -214,7 +385,13 @@ export default function DossierPage() {
       await fetch("/api/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: getOrCreateSession(), dossier, heroId: hero?.heroId, heroName: hero?.name, course }),
+        body: JSON.stringify({
+          sessionId: getOrCreateSession(),
+          dossier,
+          heroId: hero?.heroId,
+          heroName: hero?.name,
+          course,
+        }),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -223,6 +400,9 @@ export default function DossierPage() {
   }
 
   const heroColor = hero?.color || "var(--shield-gold)";
+  const totalModules = dossier?.learningModules?.length || 0;
+  const completedCount = completedModules.length;
+  const progressPct = totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
 
   return (
     <div style={{ minHeight: "calc(100vh - 60px)", background: "var(--shield-black)", padding: "0 0 80px" }}>
@@ -230,7 +410,7 @@ export default function DossierPage() {
       {/* Banner */}
       <div style={{ background: "linear-gradient(90deg, #0A0A0A, #111827, #0A0A0A)", borderBottom: "1px solid var(--shield-border)", padding: "40px 24px" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
-          <div className="classified-stamp" style={{ marginBottom: "16px" }}>Classified — Mission Dossier</div>
+          <div className="classified-stamp" style={{ marginBottom: "16px" }}>Classified — Adaptive Mission Dossier</div>
           <h1 style={{ fontFamily: "var(--font-hero)", fontSize: "clamp(1.8rem, 5vw, 3rem)", color: "var(--shield-white)", letterSpacing: "0.04em" }}>
             {hero ? (
               <>Mission Briefing: <span style={{ color: heroColor }}>{hero.name}</span></>
@@ -238,17 +418,29 @@ export default function DossierPage() {
               <>Generate Your <span className="text-gold-gradient">Mission Dossier</span></>
             )}
           </h1>
-          {hero && (
-            <p style={{ marginTop: "8px", fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--shield-silver)", letterSpacing: "0.2em" }}>
-              AGENT: {hero.name.toUpperCase()} · {hero.title?.toUpperCase()} · CLEARANCE LEVEL 7
-            </p>
+          {hero && profile.level && (
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px", flexWrap: "wrap" }}>
+              <span className="stat-pill" style={{ color: LEVEL_COLORS[profile.level], borderColor: `${LEVEL_COLORS[profile.level]}30` }}>
+                {LEVEL_LABELS[profile.level] || profile.level}
+              </span>
+              {profile.timelineMonths > 0 && (
+                <span className="stat-pill">
+                  {profile.timelineMonths}mo Timeline
+                </span>
+              )}
+              {profile.weeklyHours && (
+                <span className="stat-pill">
+                  {profile.weeklyHours}h / week
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>
 
       <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 24px" }}>
 
-        {/* No hero — prompt to take quiz */}
+        {/* No hero */}
         {!hero && (
           <div className="glass-card" style={{ padding: "28px", textAlign: "center", marginBottom: "32px" }}>
             <p style={{ color: "var(--shield-silver)", marginBottom: "16px", fontSize: "0.9rem" }}>
@@ -264,36 +456,27 @@ export default function DossierPage() {
         <div className="dossier-panel" style={{ padding: "28px", marginBottom: "32px" }}>
           <SectionHeader icon={<Search size={18} />} label="Intel Query — Enter Course" />
           <div style={{ position: "relative" }}>
-             <input
+            <input
               className="shield-input"
               placeholder="Enter your course, Agent... (e.g. B.Tech Computer Science)"
               value={courseSearch}
               onChange={(e) => { setCourseSearch(e.target.value); setCourse(""); }}
               onKeyDown={(e) => { if (e.key === "Enter" && courseSearch.trim().length >= 2) generateDossier(); }}
             />
-            {/* Suggestions dropdown */}
             {suggestions.length > 0 && !course && (
               <div style={{
-                position: "absolute",
-                top: "100%", left: 0, right: 0,
-                background: "var(--shield-navy)",
-                border: "1px solid var(--shield-border)",
-                borderTop: "none",
-                borderRadius: "0 0 8px 8px",
-                zIndex: 50,
-                overflow: "hidden",
+                position: "absolute", top: "100%", left: 0, right: 0,
+                background: "var(--shield-navy)", border: "1px solid var(--shield-border)",
+                borderTop: "none", borderRadius: "0 0 8px 8px", zIndex: 50, overflow: "hidden",
               }}>
                 {suggestions.map((s) => (
                   <div
                     key={s.shortCode}
                     onClick={() => { setCourse(s.name); setCourseSearch(s.name); setSuggestions([]); }}
                     style={{
-                      padding: "12px 18px",
-                      cursor: "pointer",
+                      padding: "12px 18px", cursor: "pointer",
                       borderBottom: "1px solid rgba(31,41,55,0.5)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
                       transition: "background 0.15s",
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = "rgba(245,166,35,0.07)"}
@@ -312,25 +495,25 @@ export default function DossierPage() {
             onClick={generateDossier}
             disabled={(!(course || courseSearch.trim())) || loading}
             style={{
-              marginTop: "16px",
-              width: "100%",
-              justifyContent: "center",
-              display: "flex",
-              alignItems: "center",
+              marginTop: "16px", width: "100%", justifyContent: "center", display: "flex", alignItems: "center",
               opacity: (course || courseSearch.trim()) && !loading ? 1 : 0.5,
-              cursor: (course || courseSearch.trim()) && !loading ? "pointer" : "not-allowed"
+              cursor: (course || courseSearch.trim()) && !loading ? "pointer" : "not-allowed",
             }}
           >
-            {loading ? "JARVIS is analyzing your future..." : <><Target size={16} style={{ marginRight: "6px" }} /> Generate Mission Dossier</>}
+            {loading ? "JARVIS is analyzing your adaptive mission..." : <><Target size={16} style={{ marginRight: "6px" }} /> Generate Adaptive Mission Dossier</>}
           </button>
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div style={{ textAlign: "center", padding: "60px 24px" }}>
             <div className="arc-loader" style={{ margin: "0 auto 20px" }} />
-            <p style={{ fontFamily: "var(--font-hero)", color: heroColor, letterSpacing: "0.15em", marginBottom: "8px" }}>JARVIS IS ANALYZING YOUR FUTURE...</p>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--shield-silver)", letterSpacing: "0.2em" }}>GROQ LLaMA-3.3-70B · EXPECTED IN &lt; 2 SECONDS</p>
+            <p style={{ fontFamily: "var(--font-hero)", color: heroColor, letterSpacing: "0.15em", marginBottom: "8px" }}>
+              JARVIS IS BUILDING YOUR ADAPTIVE ROADMAP...
+            </p>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--shield-silver)", letterSpacing: "0.2em" }}>
+              GROQ LLaMA-3.3-70B · PERSONALIZING FOR YOUR LEVEL & TIMELINE
+            </p>
           </div>
         )}
 
@@ -342,18 +525,18 @@ export default function DossierPage() {
           </div>
         )}
 
-        {/* ── DOSSIER OUTPUT ───────────────────────── */}
+        {/* ── DOSSIER OUTPUT ─────────────────────────── */}
         {dossier && !loading && (
           <div className="dossier-panel animate-fadeUp" style={{ padding: "32px", animationFillMode: "forwards" }}>
 
-            {/* Classification Header */}
+            {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "28px", flexWrap: "wrap", gap: "12px" }}>
               <div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", letterSpacing: "0.2em", color: "var(--shield-silver)", marginBottom: "6px" }}>
                   {dossier.classification || "CLASSIFIED // S.H.I.E.L.D. EYES ONLY"}
                 </div>
                 <h2 style={{ fontFamily: "var(--font-hero)", fontSize: "1.3rem", color: heroColor, letterSpacing: "0.05em" }}>
-                  {course} — Career Intelligence Report
+                  {course} — Adaptive Career Intelligence Report
                 </h2>
               </div>
               <span className="classified-stamp" style={{ alignSelf: "flex-start" }}>Top Secret</span>
@@ -370,6 +553,93 @@ export default function DossierPage() {
 
             <div className="glow-line" style={{ marginBottom: "32px" }} />
 
+            {/* ── LEARNING MISSION SEQUENCE ──────────── */}
+            {dossier.learningModules?.length > 0 && (
+              <div style={{ marginBottom: "36px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid var(--shield-border)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "1.1rem" }}><Map size={18} /></span>
+                    <span style={{ fontFamily: "var(--font-hero)", fontSize: "0.85rem", letterSpacing: "0.12em", color: "var(--shield-gold)" }}>
+                      ADAPTIVE LEARNING MISSION SEQUENCE
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: heroColor }}>
+                    {completedCount}/{totalModules} COMPLETE
+                  </span>
+                </div>
+
+                {/* Progress bar for modules */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.62rem", color: "var(--shield-silver)" }}>
+                      {progressPct}% of modules complete
+                    </span>
+                    {profile.timelineMonths > 0 && totalModules > 0 && (
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.62rem", color: heroColor }}>
+                        Est. {Math.ceil((totalModules - completedCount) * (profile.timelineMonths / totalModules))} months remaining
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {dossier.learningModules.map((mod, i) => (
+                    <LearningModuleCard
+                      key={i}
+                      module={mod}
+                      index={i}
+                      isCompleted={completedModules.includes(i)}
+                      onToggle={toggleModule}
+                      heroColor={heroColor}
+                    />
+                  ))}
+                </div>
+
+                {/* Go to Dashboard */}
+                {completedCount > 0 && (
+                  <div style={{ marginTop: "16px", textAlign: "center" }}>
+                    <a href="/dashboard" style={{
+                      display: "inline-flex", alignItems: "center", gap: "8px",
+                      fontFamily: "var(--font-hero)", fontSize: "0.82rem", letterSpacing: "0.08em",
+                      color: heroColor, textDecoration: "none", padding: "8px 18px",
+                      border: `1px solid ${heroColor}40`, borderRadius: "6px",
+                      background: `${heroColor}08`,
+                    }}>
+                      <LayoutDashboard size={16} /> View Dashboard & Career DNA Score →
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Weekly Missions */}
+            {dossier.weeklyMissions?.length > 0 && (
+              <div style={{ marginBottom: "36px" }}>
+                <SectionHeader icon={<Zap size={18} />} label="Weekly Mission Briefings" />
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {dossier.weeklyMissions.map((mission, i) => (
+                    <div key={i} style={{
+                      padding: "12px 16px", background: "rgba(17,24,39,0.6)",
+                      border: `1px solid ${heroColor}20`, borderLeft: `3px solid ${heroColor}`,
+                      borderRadius: "0 8px 8px 0",
+                    }}>
+                      <p style={{ fontSize: "0.85rem", color: "var(--shield-silver)", lineHeight: 1.5 }}>
+                        <span style={{ color: heroColor, fontFamily: "var(--font-hero)", fontSize: "0.7rem", letterSpacing: "0.1em", marginRight: "8px" }}>
+                          MISSION {i + 1}
+                        </span>
+                        {mission}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="glow-line" style={{ marginBottom: "32px" }} />
+
             {/* Career Paths */}
             {dossier.careerPaths?.length > 0 && (
               <div style={{ marginBottom: "36px" }}>
@@ -380,7 +650,7 @@ export default function DossierPage() {
               </div>
             )}
 
-            {/* Skills + Certifications */}
+            {/* Skills + Certs */}
             <div className="dossier-two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "36px" }}>
               {dossier.criticalSkills?.length > 0 && (
                 <div>
@@ -406,7 +676,7 @@ export default function DossierPage() {
               )}
             </div>
 
-            {/* Salary Intelligence */}
+            {/* Salary Intel */}
             {dossier.salaryIntel && (
               <div style={{ marginBottom: "36px" }}>
                 <SectionHeader icon={<IndianRupee size={18} />} label="Infinity Earnings Scale — City-Wise Intel" />
@@ -439,7 +709,9 @@ export default function DossierPage() {
             {/* Threat Assessment */}
             {dossier.threatAssessment && (
               <div style={{ marginBottom: "32px", padding: "16px 20px", background: "rgba(192,57,43,0.06)", border: "1px solid rgba(192,57,43,0.2)", borderLeft: "3px solid var(--shield-red)", borderRadius: "0 8px 8px 0" }}>
-                <div style={{ fontFamily: "var(--font-hero)", fontSize: "0.7rem", letterSpacing: "0.15em", color: "var(--shield-red)", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}><AlertTriangle size={12} /> THREAT ASSESSMENT</div>
+                <div style={{ fontFamily: "var(--font-hero)", fontSize: "0.7rem", letterSpacing: "0.15em", color: "var(--shield-red)", marginBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <AlertTriangle size={12} /> THREAT ASSESSMENT
+                </div>
                 <p style={{ fontSize: "0.88rem", color: "var(--shield-silver)", lineHeight: 1.6 }}>{dossier.threatAssessment}</p>
               </div>
             )}
@@ -455,13 +727,15 @@ export default function DossierPage() {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="glow-line" style={{ margin: "28px 0" }} />
+            {/* Actions */}
             <div className="glow-line" style={{ margin: "28px 0" }} />
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
               <button className="btn-gold" onClick={saveDossier} disabled={saving || saved} style={{ opacity: saving ? 0.7 : 1, display: "flex", alignItems: "center", border: "none" }}>
                 {saved ? <><Check size={16} strokeWidth={3} style={{ marginRight: "6px" }} /> Filed to Archive</> : saving ? "Filing..." : <><Archive size={16} style={{ marginRight: "6px" }} /> File to S.H.I.E.L.D. Archive</>}
               </button>
+              <a href="/dashboard" className="btn-gold" style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoration: "none", background: `linear-gradient(135deg, ${heroColor === "var(--shield-gold)" ? "#7C3AED" : heroColor}, #2563EB)` }}>
+                <LayoutDashboard size={16} /> Dashboard
+              </a>
               <a href="/history" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-hero)", fontSize: "0.9rem", letterSpacing: "0.08em", color: "var(--shield-blue)", padding: "11px 24px", border: "1.5px solid var(--shield-blue)", borderRadius: "6px", textDecoration: "none" }}>
                 <FolderOpen size={16} /> View Archive
               </a>
